@@ -9,9 +9,13 @@ _Important! awc cli should use Python 2!_
 
 ## Basic R Layer
 
-1. Create EC2 instance, install R and download the installation using `setup_r_instance.sh` script. Provide two parameters: (1) R version (e.g. `3.5.1`); (2) path to the key (e.g. `~/.ssh/key.pem`). Script will download archive with R (`R-{R version}.zip`).
+1. Create EC2 instance, install R and download the installation using `setup_r_instance.sh` script. Provide three parameters: (1) R version (e.g. `3.5.1`); (2) path to the key (e.g. `~/.ssh/key.pem`); (3) `buildr` (to build and download R). Script will download archive with R (`R-{R version}.zip`).
 2. Create runtime using `build_runtime.sh` script with R version as a parameter (e.g. `3.5.1`).
 3. Create a new layer: `aws lambda publish-layer-version --layer-name [layer name] --zip-file fileb://runtime.zip`
+
+## Lambda AMI with R
+
+1. Create EC2 instance, install R and create AMI using `setup_r_instance.sh` script. Provide three parameters: (1) R version (e.g. `3.5.1`); (2) path to the key (e.g. `~/.ssh/key.pem`); (3) `ami`. Script will create AMI.
 
 ## R packages Layer
 

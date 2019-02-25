@@ -3,6 +3,7 @@ set -x
 
 VERSION=$1
 KEY_PATH=$2
+ACTION=$3
 
 KEY_NAME=$(echo $KEY_PATH | rev | cut -d '/' -f 1 | cut -d '.' -f 2 | rev)
 
@@ -26,5 +27,8 @@ ssh -i $KEY_PATH ec2-user@$MyServerIP "chmod +x build_r.sh"
 ssh -i $KEY_PATH ec2-user@$MyServerIP "./build_r.sh $VERSION"
 
 # download R archive
-
-scp -i $KEY_PATH ec2-user@$MyServerIP:/opt/R/R-$VERSION.zip .
+if [ $ACTION == "buildr" ]; then
+  scp -i $KEY_PATH ec2-user@$MyServerIP:/opt/R/R-$VERSION.zip .
+elif [ $ACTION == "ami" ]; then
+  aws ec2 create-image --instance-id $MyServerID --name "r-ami" --description "Lambda AMI with R"
+fi
