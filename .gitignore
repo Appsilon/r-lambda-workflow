@@ -1,1 +1,3 @@
 *.zip
+R/*
+test_script.sh
