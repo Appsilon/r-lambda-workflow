@@ -19,4 +19,5 @@ _Important! awc cli should use Python 2!_
 
 ## R packages Layer
 
-TODO
+1. Create instance from AMI with R preinstalled, install required packages and download zip using `r_package_layer.sh`. You have to provide three parameters: (1) path to the key (e.g. `~/.ssh/key.pem`); (2) id of the image with preinstalled R; (3) name of the R package to be installed. Script will download the archive `packages.zip`.
+2. Create a new layer: `aws lambda publish-layer-version --layer-name [layer name] --zip-file fileb://packages.zip`

@@ -1,10 +1,9 @@
 #!/bin/bash
 set -x
 
-VERSION=$1
-KEY_PATH=$2
-IMAGE_ID=$3
-PACKAGE=$4
+KEY_PATH=$1
+IMAGE_ID=$2
+PACKAGE=$3
 
 KEY_NAME=$(echo $KEY_PATH | rev | cut -d '/' -f 1 | cut -d '.' -f 2 | rev)
 
