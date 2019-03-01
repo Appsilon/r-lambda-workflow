@@ -21,8 +21,8 @@ MyServerIP=$(aws ec2 describe-instances --instance-id $MyServerID --query 'Reser
 # install R packages
 ssh-keyscan -T 240 -H $MyServerIP &>> ~/.ssh/known_hosts
 ssh -i $KEY_PATH ec2-user@$MyServerIP "mkdir -p /opt/R/new_library/R/library"
-ssh -i ~/.ssh/kuba-appsilon.pem ec2-user@$MyServerIP "/opt/R/bin/Rscript -e 'chooseCRANmirror(graphics=FALSE, ind=34); install.packages(\"$PACKAGE\", lib = \"/opt/R/new_library/R/library\")'"
+ssh -i $KEY_PATH ec2-user@$MyServerIP "/opt/R/bin/Rscript -e 'chooseCRANmirror(graphics=FALSE, ind=34); install.packages(\"$PACKAGE\", lib = \"/opt/R/new_library/R/library\")'"
 
 # create archive and download it
 ssh -i $KEY_PATH ec2-user@$MyServerIP "cd /opt/R/new_library && zip -r packages.zip R/"
-scp -i ~/.ssh/kuba-appsilon.pem ec2-user@$MyServerIP:/opt/R/new_library/packages.zip .
+scp -i $KEY_PATH ec2-user@$MyServerIP:/opt/R/new_library/packages.zip .
