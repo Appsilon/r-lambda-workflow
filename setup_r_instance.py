@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+
+import optparse
+import os
+import time
+
+usage = "usage: %prog [options]"
+parser = optparse.OptionParser(usage=usage)
+
+parser.add_option("-r", "--r-version", action="store", default="3.5.1",
+                  dest="r_version", help="R version")
+parser.add_option("-k", "--key-path", action="store", dest="key_path",
+                  help="Path to the AWS key")
+parser.add_option("-a", "--action", action="store", dest="action",
+                  default="build_r", type="choice",
+                  choices=["build_r", "create_ami"],
+                  help="build R archive or create AMI")
+parser.add_option("-t", "--terminate", action="store", dest="terminate",
+                  default=False, help="terminate instance")
+parser.add_option("-i", "--instance-type", action="store", dest="instance_type",
+                  default="t2.micro",
+                  help="instance type")
+parser.add_option("-n", "--name-ami", action="store", dest="ami_name")
+
+(options, args) = parser.parse_args()
+
+key_name = options.key_path[::-1].split("/", 1)[0].split(".", 1)[1][::-1]
+
+print("Instance setup")
+my_server_id = os.popen(
+    "aws ec2 run-instances --image-id ami-4fffc834 --count 1 --instance-type " + \
+    options.instance_type + \
+    " --key-name " + key_name + \
+    " --query 'Instances[0].InstanceId' --output text"
+).read().strip()
+
+my_server_status = os.popen(
+    "aws ec2 describe-instance-status --instance-id " + \
+    my_server_id + \
+    " --query 'InstanceStatuses[0].SystemStatus.Status' --output text --output text"
+).read().strip()
+
+while my_server_status != "ok":
+    print("Waiting for instance")
+    time.sleep(10)
+    my_server_status = os.popen(
+        "aws ec2 describe-instance-status --instance-id " + \
+        my_server_id + \
+        " --query 'InstanceStatuses[0].SystemStatus.Status' --output text --output text"
+    ).read().strip()
+
+my_server_ip = os.popen(
+    "aws ec2 describe-instances --instance-id " + \
+    my_server_id + \
+    " --query 'Reservations[0].Instances[0].PublicIpAddress' --output text"
+).read().strip()
+
+print("Installing R")
+
+keys = os.popen("ssh-keyscan -T 240 -H " + my_server_ip).read()
+
+with open(os.path.expanduser("~/.ssh/known_hosts"), "a") as file:
+    file.write(keys)
+
+os.system(
+    "scp -i " + options.key_path + " build_r.sh ec2-user@" + my_server_ip + ":/home/ec2-user/"
+)
+os.system(
+    "ssh -i " + options.key_path + " ec2-user@" + my_server_ip + " 'chmod +x build_r.sh'"
+)
+os.system(
+    "ssh -i " + options.key_path + " ec2-user@" + my_server_ip + " './build_r.sh '" + options.r_version
+)
+
+if options.action == "build_r":
+    os.system(
+        "scp -i " + options.key_path + " ec2-user@" + my_server_ip + ":/opt/R/R-" + options.r_version + ".zip ."
+    )
+elif options.action == "create_ami":
+    os.system(
+        "aws ec2 create-image --instance-id " + \
+        my_server_id + \
+        " --name " + \
+        options.ami_name + \
+        " --description 'Lambda AMI with R'"
+    )
+else:
+    print("Not a valid action")
+
+if options.terminate == True:
+    os.system(
+        "aws ec2 terminate-instances --instance-ids " + my_server_id
+    )
