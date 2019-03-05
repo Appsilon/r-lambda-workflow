@@ -25,13 +25,12 @@ zlib-devel bzip2 bzip2-libs
 sudo yum install -y R
 
 cd /opt/R/
-./configure --prefix=/opt/R/ --exec-prefix=/opt/R/ --with-libpth-prefix=/opt/
+./configure --prefix=/opt/R/ --exec-prefix=/opt/R/ --with-libpth-prefix=/opt/ --without-recommended-packages
 make
 cp /usr/lib64/libgfortran.so.3 lib/
 cp /usr/lib64/libgomp.so.1 lib/
 cp /usr/lib64/libquadmath.so.0 lib/
 cp /usr/lib64/libstdc++.so.6 lib/
 sudo yum install -y openssl-devel libxml2-devel
-./bin/Rscript -e 'chooseCRANmirror(graphics=FALSE, ind=34); install.packages("httr")'
-./bin/Rscript -e 'chooseCRANmirror(graphics=FALSE, ind=34); install.packages("aws.s3")'
+./bin/Rscript -e 'chooseCRANmirror(graphics=FALSE, ind=34); install.packages("jsonlite")'
 zip -r R-$VERSION.zip bin/ lib/ lib64/ etc/ library/ doc/ modules/ share/
