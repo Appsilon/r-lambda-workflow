@@ -21,6 +21,14 @@ parser.add_option("-i", "--instance-type", action="store", dest="instance_type",
 
 (options, args) = parser.parse_args()
 
+# Making sure all mandatory options appeared.
+mandatories = ['key_path', 'ami_id', 'packages']
+for m in mandatories:
+    if not options.__dict__[m]:
+        print(m + " option is missing\n")
+        parser.print_help()
+        exit(-1)
+
 key_name = options.key_path[::-1].split("/", 1)[0].split(".", 1)[1][::-1]
 
 print("Instance setup")
