@@ -8,19 +8,19 @@ usage = "usage: %prog [options]"
 parser = optparse.OptionParser(usage=usage)
 
 parser.add_option("-r", "--r-version", action="store", default="3.5.1",
-                  dest="r_version", help="R version")
+                  dest="r_version", help="R version [default: %default]")
 parser.add_option("-k", "--key-path", action="store", dest="key_path",
                   help="Path to the AWS key")
 parser.add_option("-a", "--action", action="store", dest="action",
                   default="build_r", type="choice",
-                  choices=["build_r", "create_ami"],
-                  help="build R archive or create AMI")
+                  choices=("build_r", "create_ami"),
+                  help="build R archive or create AMI [default: %default; choices: build_r, create_ami]")
 parser.add_option("-t", "--terminate", action="store", dest="terminate",
-                  default=False, help="terminate instance")
+                  default=False, help="terminate instance [default: %default]")
 parser.add_option("-i", "--instance-type", action="store", dest="instance_type",
                   default="t2.micro",
-                  help="instance type")
-parser.add_option("-n", "--name-ami", action="store", dest="ami_name")
+                  help="instance type [default: %default]")
+parser.add_option("-n", "--name-ami", action="store", dest="ami_name", help="name of the created AMI image (required only if --action=create_ami)")
 
 (options, args) = parser.parse_args()
 

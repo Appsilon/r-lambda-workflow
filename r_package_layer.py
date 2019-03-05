@@ -9,15 +9,15 @@ parser = optparse.OptionParser(usage=usage)
 
 parser.add_option("-k", "--key-path", action="store", dest="key_path",
                   help="Path to the AWS key")
-parser.add_option("-a", "--ami-id", action="store", dest="ami_id",
+parser.add_option("-m", "--ami-id", action="store", dest="ami_id",
                   help="id of the R Lambda AMI")
 parser.add_option("-p", "--package", action="store", dest="packages",
                   help="R packages")
 parser.add_option("-t", "--terminate", action="store", dest="terminate",
-                  default=False, help="terminate instance")
+                  default=False, help="terminate instance [default: %default]")
 parser.add_option("-i", "--instance-type", action="store", dest="instance_type",
                   default="t2.micro",
-                  help="instance type")
+                  help="instance type [default: %default]")
 
 (options, args) = parser.parse_args()
 
