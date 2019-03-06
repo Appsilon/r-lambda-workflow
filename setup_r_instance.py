@@ -34,9 +34,10 @@ for m in mandatories:
 
 key_name = options.key_path[::-1].split("/", 1)[0].split(".", 1)[1][::-1]
 
+ami_id = os.popen("aws ec2 describe-images --filters 'Name=name,Values=amzn-ami-hvm-2017.03.1.20170812-x86_64-gp2' --query 'Images[0].ImageId'").read().strip()
 print("Instance setup")
 my_server_id = os.popen(
-    "aws ec2 run-instances --image-id ami-4fffc834 --count 1 --instance-type " + \
+    "aws ec2 run-instances --image-id " + ami_id + " --count 1 --instance-type " + \
     options.instance_type + \
     " --key-name " + key_name + \
     " --query 'Instances[0].InstanceId' --output text"
