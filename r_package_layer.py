@@ -14,7 +14,7 @@ parser.add_option("-m", "--ami-id", action="store", dest="ami_id",
 parser.add_option("-p", "--package", action="store", dest="packages",
                   help="R packages")
 parser.add_option("-t", "--terminate", action="store", dest="terminate",
-                  default=False, help="terminate instance [default: %default]")
+                  default=True, help="terminate instance [default: %default]")
 parser.add_option("-i", "--instance-type", action="store", dest="instance_type",
                   default="t2.micro",
                   help="instance type [default: %default]")
