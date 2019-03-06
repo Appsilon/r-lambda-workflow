@@ -16,7 +16,7 @@ parser.add_option("-a", "--action", action="store", dest="action",
                   choices=("build_r", "create_ami"),
                   help="build R archive or create AMI [default: %default; choices: build_r, create_ami]")
 parser.add_option("-t", "--terminate", action="store", dest="terminate",
-                  default=False, help="terminate instance [default: %default]")
+                  default=True, help="terminate instance [default: %default]")
 parser.add_option("-i", "--instance-type", action="store", dest="instance_type",
                   default="t2.micro",
                   help="instance type [default: %default]")
@@ -34,9 +34,11 @@ for m in mandatories:
 
 key_name = options.key_path[::-1].split("/", 1)[0].split(".", 1)[1][::-1]
 
+ami_id = os.popen("aws ec2 describe-images --filters 'Name=name,Values=amzn-ami-hvm-2017.03.1.20170812-x86_64-gp2' --query 'Images[0].ImageId'").read().strip()
+
 print("Instance setup")
 my_server_id = os.popen(
-    "aws ec2 run-instances --image-id ami-4fffc834 --count 1 --instance-type " + \
+    "aws ec2 run-instances --image-id " + ami_id + " --count 1 --instance-type " + \
     options.instance_type + \
     " --key-name " + key_name + \
     " --query 'Instances[0].InstanceId' --output text"
@@ -82,7 +84,7 @@ os.system(
 
 if options.action == "build_r":
     os.system(
-        "scp -i " + options.key_path + " ec2-user@" + my_server_ip + ":/opt/R/R-" + options.r_version + ".zip ."
+        "scp -i " + options.key_path + " ec2-user@" + my_server_ip + ":/opt/R/R.zip ."
     )
 elif options.action == "create_ami":
     os.system(
