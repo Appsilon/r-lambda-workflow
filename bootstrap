@@ -1,17 +1,22 @@
 #!/bin/sh
 
-set -euo pipefail
-
-# Processing
 while true
 do
   HEADERS="$(mktemp)"
-  # Get an event
+
   EVENT_DATA=$(curl -sS -LD "$HEADERS" -X GET "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/next")
   REQUEST_ID=$(grep -Fi Lambda-Runtime-Aws-Request-Id "$HEADERS" | tr -d '[:space:]' | cut -d: -f2)
 
   RESPONSE=$(/opt/R/bin/Rscript /opt/runtime.R $EVENT_DATA)
 
-  # Send the response
-  curl -X POST "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/$REQUEST_ID/response"  -d "$RESPONSE"
+  RESPONSE_KEYS=$(echo $RESPONSE | python -c "import sys, json; print json.load(sys.stdin).keys()")
+
+  RESULT=$(echo $RESPONSE_KEYS | grep -c "result")
+  if [[ $RESULT > 0 ]]; then
+    OUT="response"
+  else
+    OUT="error"
+  fi
+
+  curl -X POST "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/$REQUEST_ID/$OUT" -d "$RESPONSE"
 done
