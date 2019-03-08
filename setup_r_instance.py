@@ -87,13 +87,23 @@ if options.action == "build_r":
         "scp -i " + options.key_path + " ec2-user@" + my_server_ip + ":/opt/R/R.zip ."
     )
 elif options.action == "create_ami":
-    os.system(
+    r_lambda_ami_id = os.popen(
         "aws ec2 create-image --instance-id " + \
         my_server_id + \
         " --name " + \
         options.ami_name + \
-        " --description 'Lambda AMI with R'"
-    )
+        " --description 'Lambda AMI with R' --query 'ImageId' --output text"
+    ).read().strip()
+    ami_state = os.popen(
+        "aws ec2 describe-images --image-id " + r_lambda_ami_id + " --query 'Images[0].State' --output text"
+    ).read().strip()
+    while ami_state != "available":
+        print("Waiting for AMI")
+        time.sleep(10)
+        ami_state = os.popen(
+            "aws ec2 describe-images --image-id " + r_lambda_ami_id + " --query 'Images[0].State' --output text"
+        ).read().strip()
+    print("AMI id: " + r_lambda_ami_id)
 else:
     print("Not a valid action")
 
