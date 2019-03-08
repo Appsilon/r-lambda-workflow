@@ -18,7 +18,7 @@ To be able to use this workflow, you have to configure AWS serives.
 
 1. Install/upgrade aws cli: `pip install awscli --upgrade --user`
 2. Configure credentials: `aws configure` (provide: AWS Access Key ID, AWS Secret Access Key, Default region name)
-3. You need a Key Pair to be able to connect to EC2 instances. If you do not have one, you can create it in the Amazon EC2 console or using `aws cli`: `aws ec2 create-key-pair --key-name [key name]  --output text >> [file name].pem` (**Important:** Key file name has to be the same as key name!). You will have to provide the path to the private key as a script argument (`-k` flag) in the next steps.
+3. You need a Key Pair to be able to connect to EC2 instances. If you do not have one, you can create it in the Amazon EC2 console or using `aws cli`: `aws ec2 create-key-pair --key-name [key name] --query 'KeyMaterial' --output text >> [file name].pem` (**Important:** Key file name has to be the same as key name!). You will have to provide the path to the private key as a script argument (`-k` flag) in the next steps.
 
 Note: the instance will use your default security group. Make sure that it is open for incoming traffic from your IP on port 22, so that the script can connect and install needed packages on the instance.
 
