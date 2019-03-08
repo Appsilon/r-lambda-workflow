@@ -41,7 +41,7 @@ Note: the instance will use your default security group. Make sure that it is op
 
 1. In [AWS Console](https://console.aws.amazon.com/lambda) create a new function. Choose `Custom runtime`.
 2. After creating new function:
-  * Remove `bootstrap` and `hello.sh` files. Create new script with `.R` extension (e.g. `my_script.R`). Paste sample function inside: `hello_world <- function() {print("Hello world!")}`
+  * Remove `bootstrap` and `hello.sh` files. Create new script with `.R` extension (e.g. `my_script.R`). Paste sample function inside: `hello_world <- function() {return("Hello world!")}`
   * Change **Handler** to `[R script name (without extension)].[function name]` (as in example: `my_script.hello_world`)
   * Change **Timeout** to 60 seconds
 3. Add R layer:
@@ -55,14 +55,13 @@ Note: the instance will use your default security group. Make sure that it is op
 
 #### Currently existing Layers
 
-| layer id | region | type | installed packages |
-| -------- | ------ | ---- | ------------------ |
-|          |        |      |                    |
-|          |        |      |                    |
+| layer arn                                                | region       | content                               |
+| -------------------------------------------------------- | ------------ | ------------------------------------- |
+| arn:aws:lambda:eu-central-1:599651763768:layer:basic-r:1 | eu-central-1 | R 3.5.1                               |
+| arn:aws:lambda:eu-central-1:599651763768:layer:dplyr     | eu-central-1 | dplyr (with dependencies) for R 3.5.1 | 
 
 #### Currently existing AMI
 
-| AMI id | AMI name | content |
-| ------ | -------- | ------- |
-|        |          |         |
-|        |          |         |
+| AMI name          | AMI id              | region       | conent  |
+| --------------- | --------------------- | ------------ | ------- |
+| r-lambda-ami_id | ami-0a1147e8e86aa6175 | eu-central-1 | R 3.5.1 |
