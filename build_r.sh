@@ -19,10 +19,9 @@ sudo yum install -y readline-devel \
 xorg-x11-server-devel libX11-devel libXt-devel \
 curl-devel \
 gcc-c++ gcc-gfortran \
-zlib-devel bzip2 bzip2-libs
-# workaround for making R build work
-# issue seems similar to https://stackoverflow.com/questions/40639138/configure-error-installing-r-3-3-2-on-ubuntu-checking-whether-bzip2-support-suf
-sudo yum install -y R
+zlib-devel bzip2 bzip2-libs bzip2-devel xz-devel pcre-devel
+
+# still problems with Java
 
 cd /opt/R/
 ./configure --prefix=/opt/R/ --exec-prefix=/opt/R/ --with-libpth-prefix=/opt/ --without-recommended-packages
