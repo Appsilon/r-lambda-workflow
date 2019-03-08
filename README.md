@@ -6,6 +6,8 @@
 2. Configure credentials: `aws configure` (provide: AWS Access Key ID, AWS Secret Access Key, Default region name)
 3. You need a Key Pair to be able to connect to EC2 instances. If you do not have one, you can create it in the Amazon EC2 console or using `aws cli`: `aws ec2 create-key-pair --key-name [key name] >> [file name].pem`. You will have to provide the path to the private key as a script argument (`-k` flag) in the next steps.
 
+Note: the instance will use your default security group. Make sure that it is open for incoming traffic from your IP on port 22, so that the script can connect and install needed packages on the instance.
+
 ## Basic R Layer
 
 1. Run `./setup_r_instance.py -k [path to private key]`. It will create EC2 instance, install R and download the archive `R.zip`. Check `./setup_r_instance.py --help` for options. You have to provide at least the path to the private key (`-k`). Script by deafult terminates the instance. If you want to prevent it set `-t=False`.
