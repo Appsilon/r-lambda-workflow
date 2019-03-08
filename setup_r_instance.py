@@ -32,6 +32,12 @@ for m in mandatories:
         parser.print_help()
         exit(-1)
 
+if options.action == "create_ami":
+    existing_ami_name = os.popen("aws ec2 describe-images --filters \'Name=name,Values=" + options.ami_name + "\' --query 'Images[0]' --output text").read().strip()
+    if existing_ami_name != "None":
+        print("AMI name not available")
+        exit(-1)
+
 key_name = options.key_path[::-1].split("/", 1)[0].split(".", 1)[1][::-1]
 
 ami_id = os.popen("aws ec2 describe-images --filters 'Name=name,Values=amzn-ami-hvm-2017.03.1.20170812-x86_64-gp2' --query 'Images[0].ImageId'").read().strip()
@@ -87,13 +93,23 @@ if options.action == "build_r":
         "scp -i " + options.key_path + " ec2-user@" + my_server_ip + ":/opt/R/R.zip ."
     )
 elif options.action == "create_ami":
-    os.system(
+    r_lambda_ami_id = os.popen(
         "aws ec2 create-image --instance-id " + \
         my_server_id + \
         " --name " + \
         options.ami_name + \
-        " --description 'Lambda AMI with R'"
-    )
+        " --description 'Lambda AMI with R' --query 'ImageId' --output text"
+    ).read().strip()
+    ami_state = os.popen(
+        "aws ec2 describe-images --image-id " + r_lambda_ami_id + " --query 'Images[0].State' --output text"
+    ).read().strip()
+    while ami_state != "available":
+        print("Waiting for AMI")
+        time.sleep(10)
+        ami_state = os.popen(
+            "aws ec2 describe-images --image-id " + r_lambda_ami_id + " --query 'Images[0].State' --output text"
+        ).read().strip()
+    print("AMI id: " + r_lambda_ami_id)
 else:
     print("Not a valid action")
 
