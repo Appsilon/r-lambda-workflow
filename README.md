@@ -10,6 +10,8 @@ To deploy an R function as Lambda, you need:
   * use a layer previously prepared (see [Existing layers and AMI](#existing-layers-and-ami))
   * create new layer with required packages (see [R packages Layer](#r-packages-layer)). Creating layer with R packages requires AMI with R preinstalled. You can use one previously prepared (see [Existing layers and AMI](#existing-layers-and-ami)) or create a new one (see [Lambda AMI with R](#lambda-ami-with-r)).
 
+Provide those layers to your function. Layer with basic R has to be merged as first.
+
 ### Configuring the AWS services
 
 To be able to use this workflow, you have to configure AWS serives.
@@ -37,17 +39,17 @@ Note: the instance will use your default security group. Make sure that it is op
 
 ## Using R Runtime - example
 
-1. In [AWS Console](https://console.aws.amazon.com/lambda) create new function. Choose `Custom runtime`.
+1. In [AWS Console](https://console.aws.amazon.com/lambda) create a new function. Choose `Custom runtime`.
 2. After creating new function:
   * Remove `bootstrap` and `hello.sh` files. Create new script with `.R` file extension. Paste sample function inside: `hello_world <- function() {print("Hello world!")}`
-  * Change **Handler** to `hello_world.handler`
+  * Change **Handler** to `[file name].hello_world`
   * Change **Timeout** to 60 seconds
 3. Add R layer:
   * Go to [AWS Lambda](https://console.aws.amazon.com/lambda) > Layers
   * Copy the ARN of the R Layer
   * Go to your function and select **Layers**
   * Add layer using ARN
-4. You can test your function (remember to provide proper input data - in this example it should be empty).
+4. You can test your function (remember to provide proper input data in JSON format - in this example it should be empty).
 
 ## Existing layers and AMI
 
