@@ -32,6 +32,12 @@ for m in mandatories:
         parser.print_help()
         exit(-1)
 
+if options.action == "create_ami":
+    existing_ami_name = os.popen("aws ec2 describe-images --filters \'Name=name,Values=" + options.ami_name + "\' --query 'Images[0]' --output text").read().strip()
+    if existing_ami_name != "None":
+        print("AMI name not available")
+        exit(-1)
+
 key_name = options.key_path[::-1].split("/", 1)[0].split(".", 1)[1][::-1]
 
 ami_id = os.popen("aws ec2 describe-images --filters 'Name=name,Values=amzn-ami-hvm-2017.03.1.20170812-x86_64-gp2' --query 'Images[0].ImageId'").read().strip()
