@@ -22,6 +22,8 @@ In your Lambda you can use published pre-build layers.
 | arn:aws:lambda:eu-central-1:599651763768:layer:basic-r:1 | eu-central-1 | R 3.5.1                               |
 | arn:aws:lambda:eu-central-1:599651763768:layer:dplyr     | eu-central-1 | dplyr (with dependencies) for R 3.5.1 |
 
+Layer can be used only in the provided region.
+
 ##### Using R Runtime - example
 
 1. In [AWS Console](https://console.aws.amazon.com/lambda) create a new function (region: `eu-central-1`). Choose `Custom runtime`.
