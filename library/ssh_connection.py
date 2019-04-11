@@ -17,11 +17,14 @@ class ssh:
         except:
             print("Connection Failed!!!")
 
-    def send_command(self, command):
+    def send_command(self, command, verbose=True):
 
         try:
             stdin, stdout, stderr = self.client.exec_command(command)
-            print(stdout.readlines())
+            if verbose:
+                out = stdout.readlines()
+                for outs in out:
+                    print(outs.split('\n')[0])
         except:
             print("Command execution failed!")
 
