@@ -1,5 +1,4 @@
 import paramiko
-import scp
 
 class ssh:
     client = None
@@ -31,3 +30,19 @@ class ssh:
             self.client.close()
         except:
             print("Closing connection failed!")
+
+    def upload_file(self, local_file, remote_destination):
+        try:
+            sftp = self.client.open_sftp()
+            sftp.put(local_file, remote_destination)
+            sftp.close()
+        except:
+            print("File upload failed!")
+
+    def download_file(self, remote_file, local_destination):
+        try:
+            sftp = self.client.open_sftp()
+            sftp.get(remote_file, local_destination)
+            sftp.close()
+        except:
+            print("File download failed!")
