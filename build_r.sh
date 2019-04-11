@@ -33,4 +33,4 @@ cp /usr/lib64/libquadmath.so.0 lib/
 cp /usr/lib64/libstdc++.so.6 lib/
 sudo yum install -y openssl-devel libxml2-devel
 ./bin/Rscript -e 'chooseCRANmirror(graphics=FALSE, ind=34); install.packages("jsonlite")'
-zip -r R.zip bin/ lib/ lib64/ etc/ library/ doc/ modules/ share/
+zip -r -q R.zip bin/ lib/ lib64/ etc/ library/ doc/ modules/ share/
