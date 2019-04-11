@@ -1,4 +1,4 @@
 *.zip
 R/*
-test_script.*
 .idea
+*test*

@@ -3,6 +3,7 @@
 import optparse
 import os
 import time
+from library.ssh_connection import ssh
 
 usage = "usage: %prog [options]"
 parser = optparse.OptionParser(usage=usage)
@@ -32,13 +33,16 @@ for m in mandatories:
         parser.print_help()
         exit(-1)
 
+key_path = os.path.expanduser(options.key_path)
+key_name = os.path.basename(key_path)
+key_name = os.path.splitext(key_name)[0]
+
 if options.action == "create_ami":
     existing_ami_name = os.popen("aws ec2 describe-images --filters \'Name=name,Values=" + options.ami_name + "\' --query 'Images[0]' --output text").read().strip()
     if existing_ami_name != "None":
         print("AMI name not available")
         exit(-1)
 
-key_name = options.key_path[::-1].split("/", 1)[0].split(".", 1)[1][::-1]
 
 ami_id = os.popen("aws ec2 describe-images --filters 'Name=name,Values=amzn-ami-hvm-2017.03.1.20170812-x86_64-gp2' --query 'Images[0].ImageId'").read().strip()
 
@@ -71,27 +75,24 @@ my_server_ip = os.popen(
     " --query 'Reservations[0].Instances[0].PublicIpAddress' --output text"
 ).read().strip()
 
+print("Connecting to server")
+
+connection = ssh(ip = my_server_ip, key_path = key_path)
+
 print("Installing R")
 
-keys = os.popen("ssh-keyscan -T 240 -H " + my_server_ip).read()
+connection.upload_file("build_r.sh", "/home/ec2-user/build_r.sh")
+connection.send_command("chmod +x /home/ec2-user/build_r.sh")
+connection.send_command("cd /home/ec2-user && ./build_r.sh " + options.r_version)
 
-with open(os.path.expanduser("~/.ssh/known_hosts"), "a") as file:
-    file.write(keys)
-
-os.system(
-    "scp -i " + options.key_path + " build_r.sh ec2-user@" + my_server_ip + ":/home/ec2-user/"
-)
-os.system(
-    "ssh -i " + options.key_path + " ec2-user@" + my_server_ip + " 'chmod +x build_r.sh'"
-)
-os.system(
-    "ssh -i " + options.key_path + " ec2-user@" + my_server_ip + " './build_r.sh '" + options.r_version
-)
+print("R installed")
 
 if options.action == "build_r":
-    os.system(
-        "scp -i " + options.key_path + " ec2-user@" + my_server_ip + ":/opt/R/R.zip ."
-    )
+    try:
+        connection.download_file("/opt/R/R.zip", "R.zip")
+        print("R downloaded")
+    except:
+        print("")
 elif options.action == "create_ami":
     r_lambda_ami_id = os.popen(
         "aws ec2 create-image --instance-id " + \
