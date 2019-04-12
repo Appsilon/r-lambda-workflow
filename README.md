@@ -11,9 +11,9 @@ Base `R` and packages should be added as layers. It can be done simply by provid
 
 Note: Since `R` is not a speed demon, you should increase function timeout. The default value (3 seconds) is too low.
 
-### Pre-build layers
+### Pre-built layers
 
-In your Lambda you can use published pre-build layers.
+In your Lambda you can use published pre-built layers.
 
 ##### Currently available layers:
 
@@ -39,7 +39,7 @@ In your Lambda you can use published pre-build layers.
 ## Creating custom R layers
 
 If you want to use a specific version of `R` or you have to use packages that are not provided in the prebuild layers, you will have to create layers on your own.
-If you are using pre-build `R` layer and you have access to AMI with preinstalled `R`, you can create an instance, install required packages and download them in a simple way using `r_package_layer.py` script. Detailed description is provided in [R packages Layer](#r-packages-layer) section.
+If you are using pre-built `R` layer and you have access to AMI with preinstalled `R`, you can create an instance, install required packages and download them in a simple way using `r_package_layer.py` script. Detailed description is provided in [R packages Layer](#r-packages-layer) section.
 If you want to create a basic `R` layer, follow the instruction provided in [Basic R Layer](#basic-r-layer) section.
 Creating AMI (to use it later for `R` packages layers) is described in [Lambda AMI with R](#lambda-ami-with-r) section.
 
@@ -68,7 +68,7 @@ Note: the instance will use your default security group. Make sure that it is op
 1. Run `./r_package_layer.py  -k [path to private key] -m [R Lambda AMI id] -p [packages to install]`. It will create an instance from AMI with R preinstalled, install required packages and download archive `packages.zip`. Check `./r_package_layer.py --help` for options. You have to provide at least three parameters: `-k` path to the private key (e.g. `~/.ssh/key.pem`); `-m` Lambda AMI with preinstalled R id; `-p` packages to install (if more than one, pass in quotes e.g. `"glue, stringr"`). Script by default terminates the instance. If you want to prevent it set `-t=False`.
 2. Create a new layer: `aws lambda publish-layer-version --layer-name [layer name] --zip-file fileb://packages.zip`
 
-#### Pre-build AMI
+#### Pre-built AMI
 
 | AMI name        | AMI id                | region       | conent  |
 | --------------- | --------------------- | ------------ | ------- |
