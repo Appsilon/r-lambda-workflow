@@ -1,45 +1,36 @@
 #!/usr/bin/env python3
 
-import optparse
+import argparse
 import os
 import time
 from library.ssh_connection import ssh
 
-usage = "usage: %prog [options]"
-parser = optparse.OptionParser(usage=usage)
+parser = argparse.ArgumentParser()
 
-parser.add_option("-k", "--key-path", action="store", dest="key_path",
-                  help="Path to the AWS key")
-parser.add_option("-m", "--ami-id", action="store", dest="ami_id",
-                  help="id of the R Lambda AMI")
-parser.add_option("-p", "--package", action="store", dest="packages",
-                  help="R packages")
-parser.add_option("-t", "--terminate", action="store", dest="terminate",
-                  default=True, help="terminate instance [default: %default]")
-parser.add_option("-i", "--instance-type", action="store", dest="instance_type",
+parser.add_argument("-k", "--key-path", action="store", dest="key_path",
+                  help="Path to the AWS key", required=True)
+parser.add_argument("-m", "--ami-id", action="store", dest="ami_id",
+                  help="id of the R Lambda AMI", required=True)
+parser.add_argument("-p", "--package", action="store", dest="packages",
+                  help="R packages", required=True)
+parser.add_argument("-t", "--terminate", action="store", dest="terminate",
+                  default=True, help="terminate instance (default: %(default)s)")
+parser.add_argument("-i", "--instance-type", action="store", dest="instance_type",
                   default="t2.micro",
-                  help="instance type [default: %default]")
+                  help="instance type (default: %(default)s)")
 
-(options, args) = parser.parse_args()
+arguments = parser.parse_args()
 
-# Making sure all mandatory options appeared.
-mandatories = ['key_path', 'ami_id', 'packages']
-for m in mandatories:
-    if not options.__dict__[m]:
-        print(m + " option is missing\n")
-        parser.print_help()
-        exit(-1)
-
-key_path = os.path.expanduser(options.key_path)
+key_path = os.path.expanduser(arguments.key_path)
 key_name = os.path.basename(key_path)
 key_name = os.path.splitext(key_name)[0]
 
 print("Instance setup")
 my_server_id = os.popen(
     "aws ec2 run-instances --image-id " + \
-    options.ami_id + \
+    arguments.ami_id + \
     " --count 1 --instance-type " + \
-    options.instance_type + \
+    arguments.instance_type + \
     " --key-name " + key_name + \
     " --query 'Instances[0].InstanceId' --output text"
 ).read().strip()
@@ -73,7 +64,7 @@ print("Installing R packages")
 
 connection.send_command("mkdir -p /opt/R/new_library/R/library")
 
-packages = options.packages.replace(',', '').split()
+packages = arguments.packages.replace(',', '').split()
 
 if os.path.isfile("tmp.R"):
     os.remove("tmp.R")
@@ -93,7 +84,7 @@ print("Download packages")
 connection.send_command("cd /opt/R/new_library && zip -r -q packages.zip R/")
 connection.download_file("/opt/R/new_library/packages.zip", "packages.zip")
 
-if options.terminate == True:
+if arguments.terminate == True:
     os.system(
         "aws ec2 terminate-instances --instance-ids " + my_server_id
     )

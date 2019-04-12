@@ -1,44 +1,35 @@
 #!/usr/bin/env python3
 
-import optparse
+import argparse
 import os
 import time
 from library.ssh_connection import ssh
 
-usage = "usage: %prog [options]"
-parser = optparse.OptionParser(usage=usage)
+parser = argparse.ArgumentParser()
 
-parser.add_option("-r", "--r-version", action="store", default="3.5.1",
-                  dest="r_version", help="R version [default: %default]")
-parser.add_option("-k", "--key-path", action="store", dest="key_path",
-                  help="Path to the AWS key")
-parser.add_option("-a", "--action", action="store", dest="action",
-                  default="build_r", type="choice",
-                  choices=("build_r", "create_ami"),
-                  help="build R archive or create AMI [default: %default; choices: build_r, create_ami]")
-parser.add_option("-t", "--terminate", action="store", dest="terminate",
-                  default=True, help="terminate instance [default: %default]")
-parser.add_option("-i", "--instance-type", action="store", dest="instance_type",
+parser.add_argument("-r", "--r-version", action="store", default="3.5.1",
+                  dest="r_version", help="R version (default: %(default)s)")
+parser.add_argument("-k", "--key-path", action="store", dest="key_path",
+                  help="Path to the AWS key", required=True)
+parser.add_argument("-a", "--action", action="store", dest="action",
+                  default="build_r",
+                  choices=["build_r", "create_ami"],
+                  help="build R archive or create AMI (default: %(default)s; choices: build_r, create_ami)")
+parser.add_argument("-t", "--terminate", action="store", dest="terminate",
+                  default=True, help="terminate instance (default: %(default)s)")
+parser.add_argument("-i", "--instance-type", action="store", dest="instance_type",
                   default="t2.micro",
-                  help="instance type [default: %default]")
-parser.add_option("-n", "--name-ami", action="store", dest="ami_name", help="name of the created AMI image (required only if --action=create_ami)")
+                  help="instance type [default: %(default)s]")
+parser.add_argument("-n", "--name-ami", action="store", dest="ami_name", help="name of the created AMI image (required only if --action=create_ami)")
 
-(options, args) = parser.parse_args()
+arguments = parser.parse_args()
 
-# Making sure all mandatory options appeared.
-mandatories = ['key_path']
-for m in mandatories:
-    if not options.__dict__[m]:
-        print(m + " option is missing\n")
-        parser.print_help()
-        exit(-1)
-
-key_path = os.path.expanduser(options.key_path)
+key_path = os.path.expanduser(arguments.key_path)
 key_name = os.path.basename(key_path)
 key_name = os.path.splitext(key_name)[0]
 
-if options.action == "create_ami":
-    existing_ami_name = os.popen("aws ec2 describe-images --filters \'Name=name,Values=" + options.ami_name + "\' --query 'Images[0]' --output text").read().strip()
+if arguments.action == "create_ami":
+    existing_ami_name = os.popen("aws ec2 describe-images --filters \'Name=name,Values=" + arguments.ami_name + "\' --query 'Images[0]' --output text").read().strip()
     if existing_ami_name != "None":
         print("AMI name not available")
         exit(-1)
@@ -49,7 +40,7 @@ ami_id = os.popen("aws ec2 describe-images --filters 'Name=name,Values=amzn-ami-
 print("Instance setup")
 my_server_id = os.popen(
     "aws ec2 run-instances --image-id " + ami_id + " --count 1 --instance-type " + \
-    options.instance_type + \
+    arguments.instance_type + \
     " --key-name " + key_name + \
     " --query 'Instances[0].InstanceId' --output text"
 ).read().strip()
@@ -83,22 +74,22 @@ print("Installing R")
 
 connection.upload_file("build_r.sh", "/home/ec2-user/build_r.sh")
 connection.send_command("chmod +x /home/ec2-user/build_r.sh")
-connection.send_command("cd /home/ec2-user && ./build_r.sh " + options.r_version)
+connection.send_command("cd /home/ec2-user && ./build_r.sh " + arguments.r_version)
 
 print("R installed")
 
-if options.action == "build_r":
+if arguments.action == "build_r":
     try:
         connection.download_file("/opt/R/R.zip", "R.zip")
         print("R downloaded")
     except:
         print("")
-elif options.action == "create_ami":
+elif arguments.action == "create_ami":
     r_lambda_ami_id = os.popen(
         "aws ec2 create-image --instance-id " + \
         my_server_id + \
         " --name " + \
-        options.ami_name + \
+        arguments.ami_name + \
         " --description 'Lambda AMI with R' --query 'ImageId' --output text"
     ).read().strip()
     ami_state = os.popen(
@@ -114,7 +105,7 @@ elif options.action == "create_ami":
 else:
     print("Not a valid action")
 
-if options.terminate == True:
+if arguments.terminate == True:
     os.system(
         "aws ec2 terminate-instances --instance-ids " + my_server_id
     )
