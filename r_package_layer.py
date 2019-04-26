@@ -3,7 +3,7 @@
 import argparse
 import os
 import time
-from library.ssh_connection import ssh
+from library.ssh_connection import Ssh
 
 parser = argparse.ArgumentParser()
 
@@ -58,7 +58,7 @@ my_server_ip = os.popen(
 
 print("Connecting to server")
 
-connection = ssh(ip = my_server_ip, key_path = key_path)
+connection = Ssh(ip = my_server_ip, key_path = key_path)
 
 print("Installing R packages")
 

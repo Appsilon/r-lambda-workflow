@@ -53,7 +53,12 @@ To be able to use this workflow, you have to configure AWS services.
 
 Note: the instance will use your default security group. Make sure that it is open for incoming traffic from your IP on port 22 so that the script can connect and install needed packages on the instance.
 
-### Basic R Layer
+### Installing R packages Layer
+
+1. Run `./r_package_layer.py  -k [path to private key] -m [R Lambda AMI id] -p [packages to install]`. It will create an instance from AMI with R preinstalled, install required packages and download archive `packages.zip`. Check `./r_package_layer.py --help` for options. You have to provide at least three parameters: `-k` path to the private key (e.g. `~/.ssh/key.pem`); `-m` Lambda AMI with preinstalled R id; `-p` packages to install (if more than one, pass in quotes e.g. `"glue, stringr"`). Script by default terminates the instance. If you want to prevent it set `-t=False`.
+2. Create a new layer: `aws lambda publish-layer-version --layer-name [layer name] --zip-file fileb://packages.zip`
+
+### Base R Layer
 
 1. Run `./setup_r_instance.py -k [path to private key]`. It will create an EC2 instance, install R and download the archive `R.zip`. Check `./setup_r_instance.py --help` for options. You have to provide at least the path to the private key (`-k`). Script by default terminates the instance. If you want to prevent it set `-t=False`.
 2. Run `./build_runtime.sh` script. It will create an archive `runtime.zip` with R runtime for AWS Lambda.
@@ -62,11 +67,6 @@ Note: the instance will use your default security group. Make sure that it is op
 ### Lambda AMI with R
 
 1. Run `./setup_r_instance.py  -k [path to private key] -a create_ami -n [new ami name]`. It will create EC2 instance, install R and create AMI. Check `./setup_r_instance.py --help` for options. You have to provide at least three parameters: `-k` path to the private key (e.g. `~/.ssh/key.pem`); `-a create_ami` action; `-n` AMI name. Script by deafult terminates the instance. If you want to prevent it set `-t=False`. Script will create AMI.
-
-### R packages Layer
-
-1. Run `./r_package_layer.py  -k [path to private key] -m [R Lambda AMI id] -p [packages to install]`. It will create an instance from AMI with R preinstalled, install required packages and download archive `packages.zip`. Check `./r_package_layer.py --help` for options. You have to provide at least three parameters: `-k` path to the private key (e.g. `~/.ssh/key.pem`); `-m` Lambda AMI with preinstalled R id; `-p` packages to install (if more than one, pass in quotes e.g. `"glue, stringr"`). Script by default terminates the instance. If you want to prevent it set `-t=False`.
-2. Create a new layer: `aws lambda publish-layer-version --layer-name [layer name] --zip-file fileb://packages.zip`
 
 #### Pre-built AMI
 
