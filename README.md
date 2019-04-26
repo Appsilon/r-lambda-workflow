@@ -1,15 +1,27 @@
-# r-lambda-workflow
+# AWS Lambda runtime for R
 
-AWS Lambda is a serverless solution for running scripts triggered by various events. It supports several runtimes by default (including `Python`, `Go`, `Java`, `C#`, `Node.js`, `Ruby` and `PowerShell`), but it is possible to create custom runtime environments to use almost any other, non-supported language. This repository provides access to the pre-built components of such runtime for `R`, together with a workflow for creating additional ones e.g. with specific R packages.
+This repository provides runtime for running `R` on AWS Lambda. It also provides a workflow for using dependecies like R packages by creating additional layers.
 
-This approach uses AWS Lambda component, namely `layers`, as containers for `R` environment and provided packages. In your lambda function, you can use already prepared layers or you can prepare ones with specific content (`R` version, custom packages, etc.).
+AWS Lambda is a serverless solution for running scripts triggered by various events. It supports several runtimes by default (including `Python`, `Go`, `Java`, `C#`, `Node.js`, `Ruby` and `PowerShell`), but it is possible to create custom runtime environments to use almost any other, non-supported language.
+
+This approach uses AWS Lambda component, namely _layers_, as containers for `R` environment and provided packages. In your lambda function, you can use pre-built layers we provide or you can create your own ones with specific content (different `R` version, custom packages, etc.).
 
 ## Using R in AWS Lambda
 
-Using R scripts in AWS Lambda with provided `layers` is quite simple. When creating a new function, choose `Custom runtime`. Create your function in `*.R` script and provide script and function name in the `Handler` field (`[script name].[function name]`).
-Base `R` and packages should be added as layers. It can be done simply by providing layer ARN.  You can provide up to 5 layers. Lambda will look for required dependencies (e.g. packages) in them, in provided order. **Always use R layer as the first one.** Packages should be included as additional layers.
+Using R scripts in AWS Lambda is just a few steps:
 
-Note: Since `R` is not a speed demon, you should increase function timeout. The default value (3 seconds) is too low.
+1. In [AWS Console](https://console.aws.amazon.com/lambda) create a new function (suggested region: `eu-central-1`). Choose `Custom runtime`.
+2. After creating new function:
+    1. In _Function code_ create a new script with `.R` extension, for example `my_script.R`.
+    2. Paste function code inside, for example `hello_world <- function() { "Hello world!" }`
+    3. Change `Handler`  to `[script file name].[function name]`.
+    4. Delete `bootstrap` and `hello.sh` files created by AWS. We don't need them, because the R runtime provides its own version of `bootstrap`.
+    5. In _Basic settings_, change `Timeout`  to 30 seconds or more. Since `R` is not a speed demon, the default value (3 seconds) is too low.
+3. Add R layer:
+    1. In _Designer_ panel click _Layers_ to open layers configuration for your Lambda. This is where we need to add layer containing the `R` runtime.
+    2. Go to `Currently available layers` below and choose the base layer in your region. Add a layer giving its ARN. For example, for `eu-central-1`, the ARN is `arn:aws:lambda:eu-central-1:599651763768:layer:basic-r:1`.
+    3. If your code needs any additonal packages, they should be added additional layers. Go to **Creating custom layers** below to learn how to create such layers. After you create a layers, simply add it by providing layer ARN.  You can provide up to 5 layers. Lambda will look for required dependencies (e.g. packages) in them, in provided order. **Always use R layer as the first one.** Packages should be included as additional layers.
+4. That's it! Now you can save and test your function. Remember to provide proper input data in JSON format - in our example it should be empty.
 
 ### Pre-built layers
 
@@ -22,26 +34,13 @@ In your Lambda you can use published pre-built layers.
 | arn:aws:lambda:eu-central-1:599651763768:layer:basic-r:1 | eu-central-1 | R 3.5.1                               |
 | arn:aws:lambda:eu-central-1:599651763768:layer:dplyr     | eu-central-1 | dplyr (with dependencies) for R 3.5.1 |
 
-**A layer can be used only in the provided region!**
-
-##### Using R Runtime - example
-
-1. In [AWS Console](https://console.aws.amazon.com/lambda) create a new function (region: `eu-central-1`). Choose `Custom runtime`.
-2. After creating new function:
-  * Remove `bootstrap` and `hello.sh` files. Create new script with `.R` extension (e.g. `my_script.R`). Paste sample function inside: `hello_world <- function() {return("Hello world!")}`
-  * Change **Handler** to `[R script name (without extension)].[function name]` (as in example: `my_script.hello_world`)
-  * Change **Timeout** to 60 seconds
-3. Add R layer:
-  * Go to your function and select **Layers**
-  * Add layer using ARN: `arn:aws:lambda:eu-central-1:599651763768:layer:basic-r:1`
-4. You can test your function (remember to provide proper input data in JSON format - in this example it should be empty).
+**A layer can be used only in the provided region!** If there's no layer for your region, you can create one (for how to do that see _Basic R layer_ below) or open an issue in this repo asking for one.
 
 ## Creating custom R layers
 
-If you want to use a specific version of `R` or you have to use packages that are not provided in the prebuild layers, you will have to create layers on your own.
-If you are using pre-built `R` layer and you have access to AMI with preinstalled `R`, you can create an instance, install required packages and download them in a simple way using `r_package_layer.py` script. Detailed description is provided in [R packages Layer](#r-packages-layer) section.
-If you want to create a basic `R` layer, follow the instruction provided in [Basic R Layer](#basic-r-layer) section.
-Creating AMI (to use it later for `R` packages layers) is described in [Lambda AMI with R](#lambda-ami-with-r) section.
+If you need packages that are not provided in the prebuilt layers, you neet to create additional layers containing them. See [R packages Layer](#r-packages-layer) for instructions how to do that. You'll create an instance, install packages and extract them into a Lambda layer. We provide an AMI and scripts that make this straightforward.
+
+If you need a different version of R than provided, you'll need to create a basic `R` layer, follow the instruction provided in [Basic R Layer](#basic-r-layer) section. Creating AMI (to use it later for `R` packages layers) is described in [Lambda AMI with R](#lambda-ami-with-r) section.
 
 #### Configuring the AWS services
 
