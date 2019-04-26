@@ -10,10 +10,11 @@ function_name <- HANDLER_split[2]
 source(file_name)
 params <- fromJSON(EVENT_DATA)
 output <- tryCatch(
-  list(result = do.call(function_name, params)),
+  list(out = do.call(function_name, params), quit_status = 0),
   error = function(e) {
-    list(error = e$message)
+    list(out = e$message, quit_status = 1)
   }
 )
 
-toJSON(output)
+output$out
+quit(status = output$quit_status)
