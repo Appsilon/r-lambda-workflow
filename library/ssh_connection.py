@@ -16,6 +16,7 @@ class ssh:
 
         except:
             print("Connection Failed!!!")
+            exit(1)
 
     def send_command(self, command, verbose=True):
 
@@ -27,12 +28,14 @@ class ssh:
                     print(outs.split('\n')[0])
         except:
             print("Command execution failed!")
+            exit(1)
 
     def close(self):
         try:
             self.client.close()
         except:
             print("Closing connection failed!")
+            exit(1)
 
     def upload_file(self, local_file, remote_destination):
         try:
@@ -41,6 +44,7 @@ class ssh:
             sftp.close()
         except:
             print("File upload failed!")
+            exit(1)
 
     def download_file(self, remote_file, local_destination):
         try:
@@ -49,3 +53,4 @@ class ssh:
             sftp.close()
         except:
             print("File download failed!")
+            exit(1)
