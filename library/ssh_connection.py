@@ -1,6 +1,6 @@
 import paramiko
 
-class ssh:
+class Ssh:
     client = None
 
     def __init__(self, ip, key_path):

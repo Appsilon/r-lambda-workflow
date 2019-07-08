@@ -3,7 +3,7 @@
 import argparse
 import os
 import time
-from library.ssh_connection import ssh
+from library.ssh_connection import Ssh
 
 parser = argparse.ArgumentParser()
 
@@ -25,8 +25,7 @@ parser.add_argument("-n", "--name-ami", action="store", dest="ami_name", help="n
 arguments = parser.parse_args()
 
 key_path = os.path.expanduser(arguments.key_path)
-key_name = os.path.basename(key_path)
-key_name = os.path.splitext(key_name)[0]
+key_name = os.path.splitext(os.path.basename(key_path))[0]
 
 if arguments.action == "create_ami":
     existing_ami_name = os.popen("aws ec2 describe-images --filters \'Name=name,Values=" + arguments.ami_name + "\' --query 'Images[0]' --output text").read().strip()
@@ -68,7 +67,7 @@ my_server_ip = os.popen(
 
 print("Connecting to server")
 
-connection = ssh(ip = my_server_ip, key_path = key_path)
+connection = Ssh(ip = my_server_ip, key_path = key_path)
 
 print("Installing R")
 

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# modified from https://github.com/bakdata/aws-lambda-r-runtime
+
 set -euo pipefail
 
 VERSION=$1
