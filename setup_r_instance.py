@@ -4,6 +4,7 @@ import argparse
 import os
 import time
 from library.ssh_connection import Ssh
+import library.instance_handling as instance
 
 parser = argparse.ArgumentParser()
 
@@ -37,33 +38,7 @@ if arguments.action == "create_ami":
 ami_id = os.popen("aws ec2 describe-images --filters 'Name=name,Values=amzn-ami-hvm-2017.03.1.20170812-x86_64-gp2' --query 'Images[0].ImageId'").read().strip()
 
 print("Instance setup")
-my_server_id = os.popen(
-    "aws ec2 run-instances --image-id " + ami_id + " --count 1 --instance-type " + \
-    arguments.instance_type + \
-    " --key-name " + key_name + \
-    " --query 'Instances[0].InstanceId' --output text"
-).read().strip()
-
-my_server_status = os.popen(
-    "aws ec2 describe-instance-status --instance-id " + \
-    my_server_id + \
-    " --query 'InstanceStatuses[0].SystemStatus.Status' --output text --output text"
-).read().strip()
-
-while my_server_status != "ok":
-    print("Waiting for instance")
-    time.sleep(10)
-    my_server_status = os.popen(
-        "aws ec2 describe-instance-status --instance-id " + \
-        my_server_id + \
-        " --query 'InstanceStatuses[0].SystemStatus.Status' --output text --output text"
-    ).read().strip()
-
-my_server_ip = os.popen(
-    "aws ec2 describe-instances --instance-id " + \
-    my_server_id + \
-    " --query 'Reservations[0].Instances[0].PublicIpAddress' --output text"
-).read().strip()
+my_server_ip, my_server_id = instance.setup_instance(ami_id, arguments.instance_type, key_name)
 
 print("Connecting to server")
 
@@ -85,14 +60,10 @@ if arguments.action == "build_r":
         print("")
 elif arguments.action == "create_ami":
     r_lambda_ami_id = os.popen(
-        "aws ec2 create-image --instance-id " + \
-        my_server_id + \
-        " --name " + \
-        arguments.ami_name + \
-        " --description 'Lambda AMI with R' --query 'ImageId' --output text"
+        f"aws ec2 create-image --instance-id {my_server_id} --name {arguments.ami_name} --description 'Lambda AMI with R' --query 'ImageId' --output text"
     ).read().strip()
     ami_state = os.popen(
-        "aws ec2 describe-images --image-id " + r_lambda_ami_id + " --query 'Images[0].State' --output text"
+        f"aws ec2 describe-images --image-id {r_lambda_ami_id} --query 'Images[0].State' --output text"
     ).read().strip()
     while ami_state != "available":
         print("Waiting for AMI")
@@ -104,7 +75,5 @@ elif arguments.action == "create_ami":
 else:
     print("Not a valid action")
 
-if arguments.terminate == True:
-    os.system(
-        "aws ec2 terminate-instances --instance-ids " + my_server_id
-    )
+if arguments.terminate:
+    instance.terminate_instance(my_server_id)
