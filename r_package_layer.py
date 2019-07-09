@@ -2,8 +2,8 @@
 
 import argparse
 import os
-import time
-from library.ssh_connection import ssh
+from library.ssh_connection import Ssh
+import library.instance_handling as instance
 
 parser = argparse.ArgumentParser()
 
@@ -22,43 +22,14 @@ parser.add_argument("-i", "--instance-type", action="store", dest="instance_type
 arguments = parser.parse_args()
 
 key_path = os.path.expanduser(arguments.key_path)
-key_name = os.path.basename(key_path)
-key_name = os.path.splitext(key_name)[0]
+key_name = os.path.splitext(os.path.basename(key_path))[0]
 
 print("Instance setup")
-my_server_id = os.popen(
-    "aws ec2 run-instances --image-id " + \
-    arguments.ami_id + \
-    " --count 1 --instance-type " + \
-    arguments.instance_type + \
-    " --key-name " + key_name + \
-    " --query 'Instances[0].InstanceId' --output text"
-).read().strip()
-
-my_server_status = os.popen(
-    "aws ec2 describe-instance-status --instance-id " + \
-    my_server_id + \
-    " --query 'InstanceStatuses[0].SystemStatus.Status' --output text --output text"
-).read().strip()
-
-while my_server_status != "ok":
-    print("Waiting for instance")
-    time.sleep(10)
-    my_server_status = os.popen(
-        "aws ec2 describe-instance-status --instance-id " + \
-        my_server_id + \
-        " --query 'InstanceStatuses[0].SystemStatus.Status' --output text --output text"
-    ).read().strip()
-
-my_server_ip = os.popen(
-    "aws ec2 describe-instances --instance-id " + \
-    my_server_id + \
-    " --query 'Reservations[0].Instances[0].PublicIpAddress' --output text"
-).read().strip()
+my_server_ip, my_server_id = instance.setup_instance(arguments.ami_id, arguments.instance_type, key_name)
 
 print("Connecting to server")
 
-connection = ssh(ip = my_server_ip, key_path = key_path)
+connection = Ssh(ip = my_server_ip, key_path = key_path)
 
 print("Installing R packages")
 
@@ -84,7 +55,5 @@ print("Download packages")
 connection.send_command("cd /opt/R/new_library && zip -r -q packages.zip R/")
 connection.download_file("/opt/R/new_library/packages.zip", "packages.zip")
 
-if arguments.terminate == True:
-    os.system(
-        "aws ec2 terminate-instances --instance-ids " + my_server_id
-    )
+if arguments.terminate:
+    instance.terminate_instance(my_server_id)
