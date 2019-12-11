@@ -9,6 +9,8 @@ autopep8 = "*"
 
 [packages]
 argparse = ">=1.4"
+awscli = "*"
+paramiko = "*"
 
 [requires]
 python_version = "3.6"

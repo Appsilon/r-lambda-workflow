@@ -1,5 +1,6 @@
 import paramiko
 
+
 class Ssh:
     client = None
 
@@ -24,9 +25,9 @@ class Ssh:
             stdin, stdout, stderr = self.client.exec_command(command)
             if verbose:
                 out = stdout.readlines()
-                for outs in out:
-                    print(outs.split('\n')[0])
-        except:
+                out_err = stderr.readlines()
+                return(out, out_err)
+        except Exception:
             print("Command execution failed!")
             exit(1)
 
