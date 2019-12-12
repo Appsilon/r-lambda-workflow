@@ -1,5 +1,6 @@
 import os
 import time
+import logging
 
 
 def check_server_status(instance_id):
@@ -13,7 +14,7 @@ def setup_instance(ami_id, instance_type, key_name):
     ).read().strip()
 
     my_server_status = check_server_status(instance_id)
-    print("Waiting for instance")
+    logging.info("Waiting for instance")
     while my_server_status != "ok":
         print(".")
         time.sleep(10)
