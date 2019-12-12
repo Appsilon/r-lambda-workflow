@@ -5,13 +5,8 @@ import os
 from library.ssh_connection import Ssh
 import library.instance_handling as instance
 import logging
+from library.utils import concatenate_list_data
 
-
-def concatenate_list_data(list):
-    result= ''
-    for element in list:
-        result += str(element)
-    return result
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s-%(levelname)s-%(message)s')
 logger = logging.getLogger(__name__)
@@ -19,16 +14,16 @@ logger = logging.getLogger(__name__)
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-k", "--key-path", action="store", dest="key_path",
-                  help="Path to the AWS key", required=True)
+                    help="Path to the AWS key", required=True)
 parser.add_argument("-m", "--ami-id", action="store", dest="ami_id",
-                  help="id of the R Lambda AMI", required=True)
+                    help="id of the R Lambda AMI", required=True)
 parser.add_argument("-p", "--package", action="store", dest="packages",
-                  help="R packages", required=True)
+                    help="R packages", required=True)
 parser.add_argument("-t", "--terminate", action="store", dest="terminate",
-                  default=True, help="terminate instance (default: %(default)s)")
+                    default=True, help="terminate instance (default: %(default)s)")
 parser.add_argument("-i", "--instance-type", action="store", dest="instance_type",
-                  default="t2.micro",
-                  help="instance type (default: %(default)s)")
+                    default="t2.micro",
+                    help="instance type (default: %(default)s)")
 
 arguments = parser.parse_args()
 
@@ -40,7 +35,7 @@ my_server_ip, my_server_id = instance.setup_instance(arguments.ami_id, arguments
 
 logger.info("Connecting to server")
 
-connection = Ssh(ip = my_server_ip, key_path = key_path)
+connection = Ssh(ip=my_server_ip, key_path=key_path)
 
 logger.info("Installing R packages")
 
