@@ -8,9 +8,6 @@ import logging
 from library.utils import concatenate_list_data
 
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s-%(levelname)s-%(message)s')
-logger = logging.getLogger(__name__)
-
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-k", "--key-path", action="store", dest="key_path",
@@ -24,8 +21,19 @@ parser.add_argument("-t", "--terminate", action="store", dest="terminate",
 parser.add_argument("-i", "--instance-type", action="store", dest="instance_type",
                     default="t2.micro",
                     help="instance type (default: %(default)s)")
+parser.add_argument("-d", "--debug", action="store_true", dest="debug",
+                    help="debug mode")
 
 arguments = parser.parse_args()
+
+if arguments.debug:
+    logging_level = logging.DEBUG
+else:
+    logging_level = logging.INFO
+
+logging.basicConfig(level=logging_level, format='%(asctime)s-%(levelname)s-%(message)s')
+logger = logging.getLogger(__name__)
+
 
 key_path = os.path.expanduser(arguments.key_path)
 key_name = os.path.splitext(os.path.basename(key_path))[0]
@@ -57,7 +65,7 @@ connection.upload_file("tmp.R", "/home/ec2-user/tmp.R")
 out, out_err = connection.send_command("/opt/R/bin/Rscript --verbose /home/ec2-user/tmp.R")
 
 if len(out) > 0:
-    logger.info(concatenate_list_data(out_err))
+    logger.debug(concatenate_list_data(out_err))
 else:
     logger.error(concatenate_list_data(out_err))
 
