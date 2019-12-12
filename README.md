@@ -52,6 +52,10 @@ To be able to use this workflow, you have to configure AWS services.
 
 Note: the instance will use your default security group. Make sure that it is open for incoming traffic from your IP on port 22 so that the script can connect and install needed packages on the instance.
 
+#### Other requirements
+
+Required `Python` libraries are described in `Pipfile`. It is recommended to use this workflow with virtual environment, which can be set up with [`pipenv` library](https://pipenv.kennethreitz.org/).
+
 ### Basic R Layer
 
 1. Run `./setup_r_instance.py -k [path to private key]`. It will create an EC2 instance, install R and download the archive `R.zip`. Check `./setup_r_instance.py --help` for options. You have to provide at least the path to the private key (`-k`). Script by default terminates the instance. If you want to prevent it set `-t=False`.
